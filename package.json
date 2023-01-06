@@ -1,0 +1,24 @@
+{
+  "name": "test-functions-framework-pubsub-ts",
+  "version": "0.1.0",
+  "description": "",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "npx functions-framework --target=chk1 [--signature-type=http]",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hankei6km/test-functions-framework-pubsub-ts.git"
+  },
+  "author": "hankei6km <hankei6km@gmail.com> (https://github.com/hankei6km)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/hankei6km/test-functions-framework-pubsub-ts/issues"
+  },
+  "homepage": "https://github.com/hankei6km/test-functions-framework-pubsub-ts#readme",
+  "devDependencies": {
+    "@google-cloud/functions-framework": "^3.1.3"
+  }
+}
