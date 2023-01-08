@@ -1,5 +1,5 @@
 #!/bin/bash
 
 exec gcloud beta emulators pubsub start \
-    --project=abc \
-    --host-port='0.0.0.0:8043'
+    --project="${PUBSUB_PROJECT_ID}" \
+    --host-port="0.0.0.0:${PUBSUB_EMULATOR_HOST#*:}"

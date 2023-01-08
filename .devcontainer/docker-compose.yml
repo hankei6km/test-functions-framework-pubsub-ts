@@ -7,14 +7,29 @@ services:
     build:
       context: node
       dockerfile: Dockerfile
+      args:
+        - PUBSUB_EMULATOR_HOST=pubsub:8043
+        - PUBSUB_PROJECT_ID=abc
     hostname: node
     user: vscode
     volumes:
       - ../:/home/vscode/workspace
     tty: true
+    depends_on:
+      pubsub:
+        condition: service_healthy
   pubsub:
     build:
       context: pubsub
       dockerfile: Dockerfile
+      args:
+        - PUBSUB_EMULATOR_HOST=pubsub:8043
+        - PUBSUB_PROJECT_ID=abc
     hostname: pubsub
     tty: true
+    healthcheck:
+      test: '/healthcheck.sh || exit 1'
+      interval: 10s
+      timeout: 10s
+      retries: 6
+      start_period: 50s

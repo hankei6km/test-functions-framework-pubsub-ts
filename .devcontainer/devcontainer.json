@@ -15,12 +15,6 @@
   // Comment out to connect as root instead. More info: https://aka.ms/vscode-remote/containers/non-root.
   "remoteUser": "vscode",
   "remoteEnv": {
-    // pubsub emulator の設定
-    // - ホスト名は docker-compose.yml の service の定義で決まる
-    // - ポートは entry-point.sh 内で指定してあるもので決まる
-    // - プロジェクト名は entry-point.sh 内で指定してあるもので決まる
-    "PUBSUB_EMULATOR_HOST": "pubsub:8043",
-    "PUBSUB_PROJECT_ID": "abc",
     "GDFUSE_SA": "${localEnv:GDFUSE_SA}",
     "BOOTSTRAP_CODE": "${localEnv:BOOTSTRAP_CODE}"
   },
