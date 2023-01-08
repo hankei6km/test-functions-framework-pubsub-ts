@@ -4,12 +4,22 @@
   "description": "",
   "main": "dist/index.js",
   "type": "module",
+  "watch": {
+    "func": {
+      "patterns": [
+        "src"
+      ],
+      "extensions": "ts"
+    }
+  },
   "scripts": {
     "start": "npm run build && npx functions-framework --target=chk1 [--signature-type=http]",
     "build": "npm run clean && tsc && rimraf dist/test && mv dist/src/* dist/ && rimraf dist/src",
     "test": "node --experimental-vm-modules node_modules/.bin/jest",
     "lint:type-check": "tsc --noEmit",
-    "clean": "rimraf \"dist/*\""
+    "clean": "rimraf \"dist/*\"",
+    "func": "npm run start",
+    "watch": "npm-watch"
   },
   "repository": {
     "type": "git",
@@ -29,6 +39,7 @@
     "@types/node": "^18.11.18",
     "@types/yargs": "^17.0.19",
     "jest": "^29.3.1",
+    "npm-watch": "^0.11.0",
     "rimraf": "^3.0.2",
     "ts-jest": "^29.0.3",
     "ts-node": "^10.9.1",
