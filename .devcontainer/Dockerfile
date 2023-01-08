@@ -1,1 +1,0 @@
-FROM ghcr.io/hankei6km/h6-dev-containers:gcloud-pubsub-emu
