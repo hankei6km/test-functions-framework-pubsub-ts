@@ -26,6 +26,7 @@
     "vscode": {
       "extensions": ["esbenp.prettier-vscode"],
       "settings": {
+        "debug.javascript.autoAttachFilter": "smart",
         "[typescript]": {
           "editor.defaultFormatter": "esbenp.prettier-vscode"
         },
