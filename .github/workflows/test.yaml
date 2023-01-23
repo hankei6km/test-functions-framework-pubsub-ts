@@ -28,9 +28,6 @@ jobs:
             ${{ runner.os }}-build-${{ env.cache-name }}-
             ${{ runner.os }}-build-
 
-      - name: Install modules
-        run: npm install
-
       - name: Run tests
         run: |
           npm run lint:type-check
@@ -40,4 +37,5 @@ jobs:
         with:
           push: never
           runCmd: |
+            run: npm install
             npm run test
