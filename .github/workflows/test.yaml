@@ -28,6 +28,12 @@ jobs:
             ${{ runner.os }}-build-${{ env.cache-name }}-
             ${{ runner.os }}-build-
 
+      # キャッシュ用にコンテナの外側でインストールしておく.
+      # コンテナ内で再度インストールするとほとんどのパッケージはインストール済で扱われる、と思う.
+      # (もっと良い方法は?)
+      - name: Install pacckages
+        run: npm ci
+
       - name: Run test inside Dev Container
         uses: devcontainers/ci@v0.2
         with:
