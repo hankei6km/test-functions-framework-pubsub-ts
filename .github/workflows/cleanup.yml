@@ -37,5 +37,6 @@ jobs:
           REPO: ${{ github.repository }}
           # https://github.com/github/docs/issues/22727
           # BRANCH: ${{ github.ref }}
+          BRANCH: 'refs/pull/${{ github.event.pull_request.number }}/merge'
           # https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#running-your-workflow-based-on-the-head-or-base-branch-of-a-pull-request
-          BRANCH: ${{ github.head_ref }}
+          # BRANCH: ${{ github.head_ref }}

@@ -9,9 +9,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
-        with:
-          # https://zenn.dev/snowcait/articles/dc1851e421e600
-          ref: ${{ github.head_ref }}
 
       - name: Use Node.js 16.x
         uses: actions/setup-node@v3
