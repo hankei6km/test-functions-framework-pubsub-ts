@@ -28,14 +28,11 @@ jobs:
             ${{ runner.os }}-build-${{ env.cache-name }}-
             ${{ runner.os }}-build-
 
-      - name: Run tests
-        run: |
-          npm run lint:type-check
-
       - name: Run test inside Dev Container
         uses: devcontainers/ci@v0.2
         with:
           push: never
           runCmd: |
             npm ci
+            npm run lint:type-check
             npm run test
