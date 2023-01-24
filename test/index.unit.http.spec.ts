@@ -25,10 +25,10 @@ describe('functions', () => {
     func: HandlerFunction | undefined
   ): func is HttpFunction => {
     // TODO: HttpFunction であるかの判定を確実にできるか調べる.
-    if (typeof func === 'function' && func.length !== 2) {
-      return false
+    if (typeof func === 'function' && func.length === 2) {
+      return true
     }
-    return true
+    return false
   }
 
   beforeAll(async () => {
