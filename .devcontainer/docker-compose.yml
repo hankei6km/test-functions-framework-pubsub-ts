@@ -3,7 +3,7 @@ version: '3.8'
 services:
   node:
     privileged: true
-    init: true
+    # init: true
     build:
       context: node
       dockerfile: Dockerfile
