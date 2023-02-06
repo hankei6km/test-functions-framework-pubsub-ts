@@ -3,7 +3,7 @@ version: '3.8'
 services:
   node:
     privileged: true
-    init: true
+    # init: true
     build:
       context: node
       dockerfile: Dockerfile
@@ -26,6 +26,7 @@ services:
         - PUBSUB_EMULATOR_HOST=pubsub:8043
         - PUBSUB_PROJECT_ID=abc
     hostname: pubsub
+    user: root
     tty: true
     healthcheck:
       test: '/healthcheck.sh || exit 1'
