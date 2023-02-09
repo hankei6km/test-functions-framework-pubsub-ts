@@ -8,6 +8,33 @@ import type {
   Response,
   HttpFunction
 } from '@google-cloud/functions-framework'
+import type { getReqId } from '../src/lib/reqid.js'
+
+// TODO: `test/index.integration.http.spec.ts` と同じモック、共通化ででないか?
+jest.unstable_mockModule('../src/lib/reqid.js', async () => {
+  const mockGetReqId = jest.fn<typeof getReqId>()
+  const reset = () => {
+    mockGetReqId.mockReset().mockImplementation(async (p) => {
+      return {
+        filter: 'test-fileter',
+        sunbscription: 'test-subscription',
+        handleId: 'test-handleid'
+      }
+    })
+  }
+
+  reset()
+  return {
+    getReqId: mockGetReqId,
+    _reset: reset,
+    _getMocks: () => ({ mockGetReqId })
+  }
+})
+const mockReqid = await import('../src/lib/reqid.js')
+
+afterEach(() => {
+  ;(mockReqid as any)._reset()
+})
 
 describe('functions', () => {
   const getMocks = () => {
@@ -16,7 +43,7 @@ describe('functions', () => {
     return {
       req: req,
       res: {
-        send: jest.fn()
+        json: jest.fn()
       } as any as Response
     }
   }
@@ -46,6 +73,16 @@ describe('functions', () => {
 
     await func(mocks.req, mocks.res)
 
-    expect(mocks.res.send).toBeCalledWith('OK')
+    const { mockGetReqId } = (mockReqid as any)._getMocks()
+    // とりあえず
+    expect(mockGetReqId).toBeCalledWith({
+      sheetId: '',
+      bundleId: '',
+      password: '',
+      salt: ''
+    })
+    expect(mocks.res.json).toBeCalledWith({
+      handleId: 'test-handleid'
+    })
   })
 })
