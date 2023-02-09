@@ -10,7 +10,7 @@ import type { getReqId } from '../src/lib/reqid.js'
 
 // 各種定義
 // topics
-const topid = 'test-unit-topic-id'
+const topid = 'test-integration-topic-id'
 // subscriptions
 const sunbscription = 'test-subscription'
 const filter = 'test-fileter'
