@@ -8,7 +8,18 @@ import type {
   Response,
   HttpFunction
 } from '@google-cloud/functions-framework'
+import util from 'node:util'
+import * as child_process from 'node:child_process'
+const exec = util.promisify(child_process.exec)
 import type { getReqId } from '../src/lib/reqid.js'
+
+// 各種定義
+// topics
+const topid = 'test-unit-topic-id'
+// subscriptions
+const sunbscription = 'test-subscription'
+const filter = 'test-fileter'
+const handleId = 'test-handleid'
 
 // TODO: `test/index.integration.http.spec.ts` と同じモック、共通化ででないか?
 jest.unstable_mockModule('../src/lib/reqid.js', async () => {
@@ -16,9 +27,9 @@ jest.unstable_mockModule('../src/lib/reqid.js', async () => {
   const reset = () => {
     mockGetReqId.mockReset().mockImplementation(async (p) => {
       return {
-        filter: 'test-fileter',
-        sunbscription: 'test-subscription',
-        handleId: 'test-handleid'
+        sunbscription,
+        filter,
+        handleId
       }
     })
   }
@@ -31,6 +42,17 @@ jest.unstable_mockModule('../src/lib/reqid.js', async () => {
   }
 })
 const mockReqid = await import('../src/lib/reqid.js')
+const OLD_TOPID = process.env.TOPID
+
+beforeAll(async () => {
+  process.env.TOPID = topid
+  await exec(`./scripts/topic-setup.sh ${process.env.TOPID}`)
+})
+
+afterAll(async () => {
+  await exec(`./scripts/topic-cleanup.sh ${process.env.TOPID}`)
+  process.env.TOPID = OLD_TOPID
+})
 
 afterEach(() => {
   ;(mockReqid as any)._reset()

@@ -56,5 +56,8 @@
     "ts-node": "^10.9.1",
     "tslib": "^2.5.0",
     "typescript": "^5.0.4"
+  },
+  "dependencies": {
+    "@google-cloud/pubsub": "^3.3.0"
   }
 }
