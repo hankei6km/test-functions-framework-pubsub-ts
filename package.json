@@ -26,7 +26,7 @@
     "build:debug": "npm run build # 現状では debug 用のビルドも共通",
     "test": "node --experimental-vm-modules node_modules/.bin/jest",
     "lint:type-check": "tsc --noEmit",
-    "clean": "rimraf \"dist/*\"",
+    "clean": "rimraf \"dist/\"",
     "func": "npm run debug",
     "watch": "npm-watch func"
   },
