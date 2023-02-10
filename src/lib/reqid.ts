@@ -70,6 +70,7 @@ export async function dec(
 export type ReqInfo = {
   /**
    * The id of subscription that is used to receive response from user.
+   * it has prefix with `req-`
    */
   sunbscription: string
   /**
@@ -105,7 +106,7 @@ export type MakeReqInfoParams = {
  * @returns the information data.
  */
 export async function getReqId(params: MakeReqInfoParams): Promise<ReqInfo> {
-  const sunbscription = randomUUID()
+  const sunbscription = `req-${randomUUID()}`
   const filter = createHash('sha256')
     .update(sunbscription, 'utf8')
     .digest('hex')

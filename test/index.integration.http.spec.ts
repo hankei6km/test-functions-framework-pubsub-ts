@@ -12,7 +12,7 @@ import type { getReqId } from '../src/lib/reqid.js'
 // topics
 const topid = 'test-integration-topic-id'
 // subscriptions
-const sunbscription = 'test-subscription'
+const sunbscription = 'req-test-subscription'
 const filter = 'test-fileter'
 const handleId = 'test-handleid'
 
