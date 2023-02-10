@@ -2,7 +2,12 @@
 
 set -e
 
-TOPIC_NAME="${1}"
+TOPIC_NAME=""
+if test -n "${1}" ; then
+  TOPIC_NAME="${1}"
+elif test -n "${TOPID}" ; then
+  TOPIC_NAME="${TOPID}"
+fi
 
 if test -z "${TOPIC_NAME}" ; then
   echo "A topic name is requiered"
