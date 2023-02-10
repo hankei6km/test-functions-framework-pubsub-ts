@@ -10,6 +10,7 @@ services:
       args:
         - PUBSUB_EMULATOR_HOST=pubsub:8043
         - PUBSUB_PROJECT_ID=abc
+        - TOPID=test-topic
     hostname: node
     user: vscode
     volumes:
