@@ -96,9 +96,9 @@ describe('getReqId', () => {
     const { mockCreateCipheriv } = (mockCrypto as any)._getMocks()
 
     const i = await getReqId({ password, salt, sheetId: '', bundleId: '' })
-    expect(i.sunbscription).toEqual('50a11b0b-fea7-47b3-9934-b2191b5b6b29') // randomUUID を固定してあるので、常に同じ値.
+    expect(i.sunbscription).toEqual('req-50a11b0b-fea7-47b3-9934-b2191b5b6b29') // randomUUID を固定してあるので、常に同じ値.
     expect(i.filter).toEqual(
-      'cb6964b653b386c11b6a2b2c160e4d6442b21c8865b1f7f05d6f4f7cd03d752c'
+      '00fc2b4541cfc9128161c10a88d1bda33f0fa90416dfbac1e357e170ed68e90b'
     ) // randomUUID を固定してあるので、常に同じ値.
 
     // handleId はメソッドをコールしていたら暗号化されているだろう、ということにする.
