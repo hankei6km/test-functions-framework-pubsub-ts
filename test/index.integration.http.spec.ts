@@ -62,7 +62,7 @@ describe('functions', () => {
   it('chk1: should print `OK` with req body', async () => {
     const server = getTestServer('chk1')
     await supertest(server)
-      .post('/')
+      .get('/')
       .send({})
       .set('Content-Type', 'application/json')
       .expect(200)

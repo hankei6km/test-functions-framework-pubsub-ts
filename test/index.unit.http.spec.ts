@@ -8,6 +8,7 @@ import type {
   Response,
   HttpFunction
 } from '@google-cloud/functions-framework'
+import { getMockReq, getMockRes } from '@jest-mock/express'
 import util from 'node:util'
 import * as child_process from 'node:child_process'
 const exec = util.promisify(child_process.exec)
@@ -59,14 +60,20 @@ afterEach(() => {
 })
 
 describe('functions', () => {
+  const { res, next, clearMockRes } = getMockRes()
+  beforeEach(() => {
+    clearMockRes()
+  })
   const getMocks = () => {
-    const req = { body: {}, query: {} } as any as Request
+    //const req = { body: {}, query: {} } as any as Request
 
     return {
-      req: req,
-      res: {
-        json: jest.fn()
-      } as any as Response
+      req: getMockReq({
+        method: 'GET',
+        url: '/'
+      }),
+      res,
+      next
     }
   }
 
@@ -74,7 +81,10 @@ describe('functions', () => {
     func: HandlerFunction | undefined
   ): func is HttpFunction => {
     // TODO: HttpFunction であるかの判定を確実にできるか調べる.
-    if (typeof func === 'function' && func.length === 2) {
+    if (
+      typeof func === 'function' &&
+      (func.length === 2 || func.length === 3)
+    ) {
       return true
     }
     return false
@@ -93,7 +103,8 @@ describe('functions', () => {
       throw new Error('fucntion is not HttpFunction')
     }
 
-    await func(mocks.req, mocks.res)
+    const pfunc = util.promisify(func)
+    await pfunc(mocks.req, mocks.res)
 
     const { mockGetReqId } = (mockReqid as any)._getMocks()
     // とりあえず
