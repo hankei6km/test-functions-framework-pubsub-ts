@@ -12,51 +12,79 @@ import { getMockReq, getMockRes } from '@jest-mock/express'
 import util from 'node:util'
 import * as child_process from 'node:child_process'
 const exec = util.promisify(child_process.exec)
-import type { getReqId } from '../src/lib/reqid.js'
+import { PubSub, Subscription } from '@google-cloud/pubsub'
+import type {
+  createSubWithInfo,
+  getValidSub,
+  handleMessage
+} from '../src/lib/pubsub.js'
 
 // 各種定義
+// pubsub
+const mockClient = new PubSub()
+const mockSub = 'test-sub-mock' as any as Subscription
+const mockMessage = { data: 'test-message-mock' }
 // topics
 const topid = 'test-unit-topic-id'
 // subscriptions
 const sunbscription = 'req-test-subscription'
 const filter = 'test-fileter'
 const handleId = 'test-handleid'
+const subscriptionDuration = '2000'
+const messagePullTimeout = '500'
 
-// TODO: `test/index.integration.http.spec.ts` と同じモック、共通化ででないか?
-jest.unstable_mockModule('../src/lib/reqid.js', async () => {
-  const mockGetReqId = jest.fn<typeof getReqId>()
+jest.unstable_mockModule('@google-cloud/pubsub', async () => {
+  const mockPubSub = jest.fn<() => typeof mockClient>()
   const reset = () => {
-    mockGetReqId.mockReset().mockImplementation(async (p) => {
+    mockPubSub.mockReset().mockImplementation(() => {
+      return mockClient
+    })
+  }
+  reset()
+  return {
+    PubSub: mockPubSub,
+    _reset: reset,
+    _getMocks: () => ({
+      mockPubSub
+    })
+  }
+})
+jest.unstable_mockModule('../src/lib/pubsub.js', async () => {
+  const mockCreateSubWithInfo = jest.fn<typeof createSubWithInfo>()
+  const mockGetValidSub = jest.fn<typeof getValidSub>()
+  const mockHandleMessage = jest.fn<typeof handleMessage>()
+  const reset = () => {
+    mockCreateSubWithInfo.mockReset().mockImplementation(async (p) => {
       return {
         sunbscription,
         filter,
         handleId
       }
     })
+    mockGetValidSub.mockReset().mockResolvedValue(mockSub)
+    mockHandleMessage.mockReset().mockResolvedValue(mockMessage)
   }
 
   reset()
   return {
-    getReqId: mockGetReqId,
+    createSubWithInfo: mockCreateSubWithInfo,
+    getValidSub: mockGetValidSub,
+    handleMessage: mockHandleMessage,
     _reset: reset,
-    _getMocks: () => ({ mockGetReqId })
+    _getMocks: () => ({
+      mockCreateSubWithInfo,
+      mockGetValidSub,
+      mockHandleMessage
+    })
   }
 })
-const mockReqid = await import('../src/lib/reqid.js')
+const mockPubsub = await import('../src/lib/pubsub.js')
 const OLD_TOPID = process.env.TOPID
-
-beforeAll(async () => {
-  process.env.TOPID = topid
-  await exec(`./scripts/topic-setup.sh ${process.env.TOPID}`)
-})
-
-afterAll(async () => {
-  await exec(`./scripts/topic-cleanup.sh ${process.env.TOPID}`)
-  process.env.TOPID = OLD_TOPID
-})
+const OLD_SUBSCRIPTION_DURATION = process.env.SUBSCRIPTION_DURATION
+const OLD_MESSAGE_PULL_TIMEOUT = process.env.MESSAGE_PULL_TIMEOUT
 
 afterEach(() => {
-  ;(mockReqid as any)._reset()
+  ;(mockPubsub as any)._reset()
 })
 
 describe('functions', () => {
@@ -64,13 +92,13 @@ describe('functions', () => {
   beforeEach(() => {
     clearMockRes()
   })
-  const getMocks = () => {
+  const getMocks = (method: string, url: string) => {
     //const req = { body: {}, query: {} } as any as Request
 
     return {
       req: getMockReq({
-        method: 'GET',
-        url: '/'
+        method,
+        url
       }),
       res,
       next
@@ -91,12 +119,44 @@ describe('functions', () => {
   }
 
   beforeAll(async () => {
+    process.env.TOPID = topid
+    process.env.SUBSCRIPTION_DURATION = subscriptionDuration
+    process.env.MESSAGE_PULL_TIMEOUT = messagePullTimeout
     // load the module that defines `chk1`
     await import('../src/index.js')
   })
+  afterAll(async () => {
+    process.env.SUBSCRIPTION_DURATION = OLD_SUBSCRIPTION_DURATION
+    process.env.MESSAGE_PULL_TIMEOUT = OLD_MESSAGE_PULL_TIMEOUT
+    process.env.TOPID = OLD_TOPID
+  })
 
-  it('chk1: should send `OK`', async () => {
-    const mocks = getMocks()
+  it('chk1: should redirects to `/status/:handlId`', async () => {
+    const func = getFunction('chk1')
+    if (!isHttpFunction(func)) {
+      throw new Error('fucntion is not HttpFunction')
+    }
+
+    const mocks = getMocks('GET', '/')
+    await util.promisify(func)(mocks.req, mocks.res)
+
+    const { mockCreateSubWithInfo } = (mockPubsub as any)._getMocks()
+    // とりあえず
+    expect(mockCreateSubWithInfo).toBeCalledWith(mockClient, topid, {
+      sheetId: '',
+      bundleId: '',
+      password: '',
+      salt: ''
+    })
+    expect(mocks.res.status).toBeCalledWith(301)
+    expect(mocks.res.location).toBeCalledWith('/status/test-handleid?c=0')
+    expect(mocks.res.send).toBeCalledWith()
+  })
+
+  it('chk1: should send data that is pulled from subscription', async () => {
+    const { mockCreateSubWithInfo, mockGetValidSub, mockHandleMessage } = (
+      mockPubsub as any
+    )._getMocks()
 
     const func = getFunction('chk1')
     if (!isHttpFunction(func)) {
@@ -104,18 +164,41 @@ describe('functions', () => {
     }
 
     const pfunc = util.promisify(func)
+
+    // `/` でリクエスト
+    const mocks = getMocks('GET', '/')
     await pfunc(mocks.req, mocks.res)
 
-    const { mockGetReqId } = (mockReqid as any)._getMocks()
     // とりあえず
-    expect(mockGetReqId).toBeCalledWith({
+    expect(mockCreateSubWithInfo).toBeCalledWith(mockClient, topid, {
       sheetId: '',
       bundleId: '',
       password: '',
       salt: ''
     })
-    expect(mocks.res.json).toBeCalledWith({
-      handleId: 'test-handleid'
-    })
+    expect(mocks.res.status).toBeCalledWith(301)
+    expect(mocks.res.location).toBeCalledWith('/status/test-handleid?c=0')
+    expect(mocks.res.send).toBeCalledWith()
+
+    // リダイレクト
+    clearMockRes() // TODO: res モックの扱いをもう少し考える。あるいはテストの構成を考える
+    const mocksR1 = getMocks('GET', '/status/test-handleid?c=0')
+    await pfunc(mocksR1.req, mocksR1.res)
+
+    expect(mockGetValidSub).toBeCalledWith(
+      mockClient,
+      Number.parseInt(subscriptionDuration, 10),
+      handleId
+    )
+    expect(mockHandleMessage).toBeCalledWith(
+      mockSub,
+      Number.parseInt(messagePullTimeout, 10)
+    )
+    expect(mocksR1.res.status).toBeCalledTimes(0)
+    expect(mocksR1.res.location).toBeCalledTimes(0)
+    expect(mocksR1.res.json).toBeCalledWith({ message: 'test-message-mock' })
+    // pull でタイムアウトしたときも試す?
+    // - integragted でテストしている
+    // - `pubsub.ts` の unit テストを作る予定
   })
 })
