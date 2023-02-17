@@ -6,68 +6,66 @@ import { getTestServer } from '@google-cloud/functions-framework/testing'
 import util from 'node:util'
 import * as child_process from 'node:child_process'
 const exec = util.promisify(child_process.exec)
-import type { getReqId } from '../src/lib/reqid.js'
 
 // 各種定義
 // topics
 const topid = 'test-integration-topic-id'
 // subscriptions
-const sunbscription = 'req-test-subscription'
-const filter = 'test-fileter'
-const handleId = 'test-handleid'
+const subscriptionDuration = '2000'
+const messagePullTimeout = '500'
 
-// TODO: `test/index.unit.http.spec.ts` と同じモック、共通化ででないか?
-jest.unstable_mockModule('../src/lib/reqid.js', async () => {
-  const mockGetReqId = jest.fn<typeof getReqId>()
-  const reset = () => {
-    mockGetReqId.mockReset().mockImplementation(async (p) => {
-      return {
-        sunbscription,
-        filter,
-        handleId
-      }
-    })
-  }
-
-  reset()
-  return {
-    getReqId: mockGetReqId,
-    _reset: reset,
-    _getMocks: () => ({ mockGetReqId })
-  }
-})
-const mockReqid = await import('../src/lib/reqid.js')
 const OLD_TOPID = process.env.TOPID
-
-beforeAll(async () => {
-  process.env.TOPID = topid
-  await exec(`./scripts/topic-setup.sh ${process.env.TOPID}`)
-})
-
-afterAll(async () => {
-  await exec(`./scripts/topic-cleanup.sh ${process.env.TOPID}`)
-  process.env.TOPID = OLD_TOPID
-})
-
-afterEach(() => {
-  ;(mockReqid as any)._reset()
-})
+const OLD_SUBSCRIPTION_DURATION = process.env.SUBSCRIPTION_DURATION
+const OLD_MESSAGE_PULL_TIMEOUT = process.env.MESSAGE_PULL_TIMEOUT
 
 describe('functions', () => {
   beforeAll(async () => {
+    process.env.TOPID = topid
+    process.env.SUBSCRIPTION_DURATION = subscriptionDuration
+    process.env.MESSAGE_PULL_TIMEOUT = messagePullTimeout
     // load the module that defines `chk1`
     await import('../src/index.js')
   })
+  afterAll(async () => {
+    process.env.TOPID = OLD_TOPID
+    process.env.SUBSCRIPTION_DURATION = OLD_SUBSCRIPTION_DURATION
+    process.env.MESSAGE_PULL_TIMEOUT = OLD_MESSAGE_PULL_TIMEOUT
+  })
 
-  it('chk1: should print `OK` with req body', async () => {
+  beforeEach(async () => {
+    await exec(`./scripts/topic-setup.sh ${topid}`)
+  })
+  afterEach(async () => {
+    await exec(`./scripts/topic-cleanup.sh ${topid}`)
+  })
+
+  it('chk1: should exists a subscription during redirections', async () => {
+    const p = new Promise<void>((resolve) => {
+      setTimeout(async () => {
+        // タイミング依存.
+        // PubSub emulator はフィルターを考慮しないことを利用している.
+        await exec(`./scripts/topic-publish.sh ${topid}`)
+        resolve()
+      }, 1000)
+    })
     const server = getTestServer('chk1')
     await supertest(server)
       .get('/')
       .send({})
       .set('Content-Type', 'application/json')
-      .expect(200)
-      .expect({
-        handleId: 'test-handleid'
-      })
+      .redirects(5)
+      .expect({ message: 'test message' })
+
+    await p
+  })
+
+  it('chk1: should expire a subscription', async () => {
+    const server = getTestServer('chk1')
+    await supertest(server)
+      .get('/')
+      .send({})
+      .set('Content-Type', 'application/json')
+      .redirects(5)
+      .expect({ errMessage: 'expiered' })
   })
 })
