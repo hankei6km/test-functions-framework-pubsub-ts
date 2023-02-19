@@ -59,6 +59,7 @@
     "typescript": "^5.0.4"
   },
   "dependencies": {
-    "@google-cloud/pubsub": "^3.3.0"
+    "@google-cloud/pubsub": "^3.3.0",
+    "express-validator": "^6.15.0"
   }
 }
