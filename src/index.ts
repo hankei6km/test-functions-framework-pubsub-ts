@@ -2,6 +2,7 @@ import * as functions from '@google-cloud/functions-framework'
 import express from 'express'
 import { PubSub } from '@google-cloud/pubsub'
 import { createSubWithInfo, getValidSub, handleMessage } from './lib/pubsub.js'
+import { validateReqInfoParams } from './lib/validate.js'
 
 // バリデーション摘なものを入れる.
 const topicNameOrId = process.env.TOPID || ''
@@ -15,10 +16,10 @@ const pubSubClient = new PubSub()
 
 const router = express.Router()
 app.use(router)
-router.get('/', (req, res, next) => {
+router.get('/', validateReqInfoParams, (req, res, next) => {
   createSubWithInfo(pubSubClient, topicNameOrId, {
-    sheetId: '', // from request.
-    bundleId: '', // from request.
+    sheetId: req.query.sheetId as string, // validator でどうにかできない?
+    bundleId: req.query.bundleId as string, // validator でどうにかできない?
     password: '', // from secret(ev var)
     salt: '' // from secret(ev var)
   })

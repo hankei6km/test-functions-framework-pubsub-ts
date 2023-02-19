@@ -8,6 +8,9 @@ import * as child_process from 'node:child_process'
 const exec = util.promisify(child_process.exec)
 
 // 各種定義
+// query
+const sheetId = 'test-sheetid'
+const bundleId = 'bundle-sheetid'
 // topics
 const topid = 'test-integration-topic-id'
 // subscriptions
@@ -51,6 +54,7 @@ describe('functions', () => {
     const server = getTestServer('chk1')
     await supertest(server)
       .get('/')
+      .query({ sheetId, bundleId })
       .send({})
       .set('Content-Type', 'application/json')
       .redirects(5)
@@ -63,9 +67,28 @@ describe('functions', () => {
     const server = getTestServer('chk1')
     await supertest(server)
       .get('/')
+      .query({ sheetId, bundleId })
       .send({})
       .set('Content-Type', 'application/json')
       .redirects(5)
       .expect({ errMessage: 'expiered' })
+  })
+
+  it('chk1: should send 400 when query is invalid', async () => {
+    const server = getTestServer('chk1')
+    await supertest(server)
+      .get('/')
+      .query({})
+      .send({})
+      .set('Content-Type', 'application/json')
+      .redirects(5)
+      .expect({
+        errors: [
+          { msg: 'Invalid value', param: 'sheetId', location: 'body' },
+          { msg: 'Invalid value', param: 'sheetId', location: 'body' },
+          { msg: 'Invalid value', param: 'bundleId', location: 'body' },
+          { msg: 'Invalid value', param: 'bundleId', location: 'body' }
+        ]
+      })
   })
 })

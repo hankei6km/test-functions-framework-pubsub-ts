@@ -20,6 +20,9 @@ import type {
 } from '../src/lib/pubsub.js'
 
 // 各種定義
+// query
+const sheetId = 'test-sheetid'
+const bundleId = 'bundle-sheetid'
 // pubsub
 const mockClient = new PubSub()
 const mockSub = 'test-sub-mock' as any as Subscription
@@ -92,13 +95,14 @@ describe('functions', () => {
   beforeEach(() => {
     clearMockRes()
   })
-  const getMocks = (method: string, url: string) => {
+  const getMocks = (method: string, url: string, query: Request['query']) => {
     //const req = { body: {}, query: {} } as any as Request
 
     return {
       req: getMockReq({
         method,
-        url
+        url,
+        query
       }),
       res,
       next
@@ -137,14 +141,14 @@ describe('functions', () => {
       throw new Error('fucntion is not HttpFunction')
     }
 
-    const mocks = getMocks('GET', '/')
+    const mocks = getMocks('GET', '/', { sheetId, bundleId })
     await util.promisify(func)(mocks.req, mocks.res)
 
     const { mockCreateSubWithInfo } = (mockPubsub as any)._getMocks()
     // とりあえず
     expect(mockCreateSubWithInfo).toBeCalledWith(mockClient, topid, {
-      sheetId: '',
-      bundleId: '',
+      sheetId,
+      bundleId,
       password: '',
       salt: ''
     })
@@ -166,13 +170,13 @@ describe('functions', () => {
     const pfunc = util.promisify(func)
 
     // `/` でリクエスト
-    const mocks = getMocks('GET', '/')
+    const mocks = getMocks('GET', '/', { sheetId, bundleId })
     await pfunc(mocks.req, mocks.res)
 
     // とりあえず
     expect(mockCreateSubWithInfo).toBeCalledWith(mockClient, topid, {
-      sheetId: '',
-      bundleId: '',
+      sheetId,
+      bundleId,
       password: '',
       salt: ''
     })
@@ -182,7 +186,7 @@ describe('functions', () => {
 
     // リダイレクト
     clearMockRes() // TODO: res モックの扱いをもう少し考える。あるいはテストの構成を考える
-    const mocksR1 = getMocks('GET', '/status/test-handleid?c=0')
+    const mocksR1 = getMocks('GET', '/status/test-handleid?c=0', {})
     await pfunc(mocksR1.req, mocksR1.res)
 
     expect(mockGetValidSub).toBeCalledWith(
@@ -200,5 +204,50 @@ describe('functions', () => {
     // pull でタイムアウトしたときも試す?
     // - integragted でテストしている
     // - `pubsub.ts` の unit テストを作る予定
+  })
+
+  it('chk1: should send 400 when query is invalid', async () => {
+    const func = getFunction('chk1')
+    if (!isHttpFunction(func)) {
+      throw new Error('fucntion is not HttpFunction')
+    }
+
+    const mocks = getMocks('GET', '/', {})
+    await util.promisify(func)(mocks.req, mocks.res)
+
+    const { mockCreateSubWithInfo } = (mockPubsub as any)._getMocks()
+    // とりあえず
+    expect(mockCreateSubWithInfo).toBeCalledTimes(0)
+    expect(mocks.res.status).toBeCalledWith(400)
+    expect(mocks.res.send).toBeCalledWith({
+      errors: [
+        //`.notEmpty().isString()` で 2 回エラーでメッセージが重複している.
+        // 調整する方法を考える.
+        {
+          location: 'body',
+          msg: 'Invalid value',
+          param: 'sheetId',
+          value: undefined
+        },
+        {
+          location: 'body',
+          msg: 'Invalid value',
+          param: 'sheetId',
+          value: undefined
+        },
+        {
+          location: 'body',
+          msg: 'Invalid value',
+          param: 'bundleId',
+          value: undefined
+        },
+        {
+          location: 'body',
+          msg: 'Invalid value',
+          param: 'bundleId',
+          value: undefined
+        }
+      ]
+    })
   })
 })
