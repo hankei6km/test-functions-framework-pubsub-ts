@@ -26,7 +26,7 @@
     "build:debug": "npm run build # 現状では debug 用のビルドも共通",
     "test": "node --experimental-vm-modules node_modules/.bin/jest",
     "lint:type-check": "tsc --noEmit",
-    "clean": "rimraf \"dist/*\"",
+    "clean": "rimraf \"dist/\"",
     "func": "npm run debug",
     "watch": "npm-watch func"
   },
@@ -42,6 +42,7 @@
   "homepage": "https://github.com/hankei6km/test-functions-framework-pubsub-ts#readme",
   "devDependencies": {
     "@google-cloud/functions-framework": "^3.2.0",
+    "@jest-mock/express": "^2.0.1",
     "@swc/core": "^1.3.56",
     "@swc/jest": "^0.2.26",
     "@types/jest": "^29.5.1",
@@ -56,5 +57,9 @@
     "ts-node": "^10.9.1",
     "tslib": "^2.5.0",
     "typescript": "^5.0.4"
+  },
+  "dependencies": {
+    "@google-cloud/pubsub": "^3.3.0",
+    "express-validator": "^6.15.0"
   }
 }
