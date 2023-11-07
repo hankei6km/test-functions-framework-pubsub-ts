@@ -42,7 +42,7 @@
   "homepage": "https://github.com/hankei6km/test-functions-framework-pubsub-ts#readme",
   "devDependencies": {
     "@google-cloud/functions-framework": "^3.3.0",
-    "@swc/core": "^1.3.95",
+    "@swc/core": "^1.3.96",
     "@swc/jest": "^0.2.29",
     "@types/jest": "^29.5.6",
     "@types/node": "^20.8.10",
