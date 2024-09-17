@@ -44,7 +44,7 @@
     "@google-cloud/functions-framework": "^3.4.2",
     "@swc/core": "^1.7.24",
     "@swc/jest": "^0.2.36",
-    "@types/jest": "^29.5.12",
+    "@types/jest": "^29.5.13",
     "@types/node": "^22.5.4",
     "@types/supertest": "^6.0.2",
     "@types/yargs": "^17.0.33",
