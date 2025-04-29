@@ -43,7 +43,7 @@
   "devDependencies": {
     "@google-cloud/functions-framework": "^3.5.1",
     "@swc/core": "^1.11.22",
-    "@swc/jest": "^0.2.37",
+    "@swc/jest": "^0.2.38",
     "@types/jest": "^29.5.14",
     "@types/node": "^22.15.3",
     "@types/supertest": "^6.0.3",
