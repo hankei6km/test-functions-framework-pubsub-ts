@@ -46,6 +46,6 @@ describe('functions', () => {
 
     await func(mocks.req, mocks.res)
 
-    expect(mocks.res.send).toBeCalledWith('OK')
+    expect(mocks.res.send).toHaveBeenCalledWith('OK')
   })
 })
