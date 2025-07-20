@@ -48,7 +48,7 @@
     "@types/node": "^24.0.15",
     "@types/supertest": "^6.0.3",
     "@types/yargs": "^17.0.33",
-    "jest": "^30.0.3",
+    "jest": "^30.0.4",
     "npm-watch": "^0.13.0",
     "rimraf": "^6.0.1",
     "supertest": "^7.1.3",
