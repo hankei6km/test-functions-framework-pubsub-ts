@@ -45,7 +45,7 @@
     "@swc/core": "^1.15.24",
     "@swc/jest": "^0.2.39",
     "@types/jest": "^30.0.0",
-    "@types/node": "^25.5.2",
+    "@types/node": "^25.6.0",
     "@types/supertest": "^7.2.0",
     "@types/yargs": "^17.0.35",
     "jest": "^30.3.0",
