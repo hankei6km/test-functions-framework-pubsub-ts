@@ -46,7 +46,7 @@
     "@swc/jest": "^0.2.39",
     "@types/jest": "^30.0.0",
     "@types/node": "^26.1.1",
-    "@types/supertest": "^7.2.0",
+    "@types/supertest": "^7.2.1",
     "@types/yargs": "^17.0.35",
     "jest": "^30.4.2",
     "npm-watch": "^0.13.0",
